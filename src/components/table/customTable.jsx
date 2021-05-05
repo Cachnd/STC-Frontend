@@ -1,9 +1,12 @@
 import React from 'react'
 import { Table, Button, Icon, Segment } from 'semantic-ui-react';
+import StudentModal from '../modal/index'
 
 class CustomTable extends React.Component{
 
-  state = { students: [{firstName: null, lastName: null, id: null}] }
+  state = { students: [{firstName: null, lastName: null, id: null}] ,
+            newStudentModal: false
+          }
 
   componentDidMount() {
     this.getStudentList();
@@ -23,11 +26,16 @@ class CustomTable extends React.Component{
         })
   }
 
+  newStudentModalSet = (state) => {
+    this.setState({newStudentModal: state})
+  }
+
 
 //The warning for "findDOMNode is deprecated in StrictMode" it's on the Button component 
 
     render(){
       const students = this.state.students;
+      const newStudentModal = this.state.newStudentModal;
         return(
           <Segment>
             <div>
@@ -36,9 +44,11 @@ class CustomTable extends React.Component{
                 labelPosition='left'
                 primary
                 size='small'
+                onClick={() => this.newStudentModalSet(true)}
               >
                 <Icon name='user'/> New Student
               </Button>
+              <StudentModal open={newStudentModal} setOpen={this.newStudentModalSet} />
             </div>
             <Table compact celled>
               <Table.Header>
