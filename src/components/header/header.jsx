@@ -1,13 +1,12 @@
 import React from 'react'
 import { withRouter} from 'react-router-dom';
-import { Menu, Image } from 'semantic-ui-react';
+import { Menu } from 'semantic-ui-react';
 
 class Header extends React.Component{
 
     render(){
         return(
             <Menu
-                fixed
                 inverted
                 attached="top">
                 <Menu.Item>
