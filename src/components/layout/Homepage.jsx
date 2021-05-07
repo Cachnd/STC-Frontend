@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { Component, Fragment } from 'react';
 import { Segment } from 'semantic-ui-react'
 import Header from '../header/index'
 
@@ -6,10 +6,12 @@ class HomePage extends Component {
 
   render() {
     return(      
-        <Segment>
+        <Fragment>
             <Header/>
-            Welcome
-        </Segment>
+            <Segment>
+              HomePage
+            </Segment>
+        </Fragment>
     )
   }
 }
