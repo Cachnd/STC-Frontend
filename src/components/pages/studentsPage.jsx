@@ -10,7 +10,7 @@ class StudentsPage extends React.Component{
     this.state = { students: [{firstName: null, lastName: null, id: null}] ,
                   editModalState: false,
                   selectedStudent: {firstName: '', lastName: '', id: ''},
-                  alert: {title: 'A', message: 'aaa', type: 'warning', alertState: true,}
+                  alert: {title: '', message: '', type: '', alertState: false,}
                  }
     this.handleChange = this.handleChange.bind(this);
   }
@@ -77,6 +77,10 @@ class StudentsPage extends React.Component{
   }));
   }
 
+  createAlert = (alert) => {
+    this.setState({alert: alert});
+  }
+
 
 //The warning for "findDOMNode is deprecated in StrictMode" it's on the Button component 
 
@@ -103,6 +107,7 @@ class StudentsPage extends React.Component{
               <StudentModal open={editModalState} student={selectedStudent} 
                 setOpen={this.editModalState}
                 handleChange={this.handleChange}
+                createAlert={this.createAlert}
                 />
             </div>
             <Table compact celled>

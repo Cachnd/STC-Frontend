@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Button, Form, Modal } from 'semantic-ui-react'
+import { withRouter} from 'react-router-dom';
 
 class StudentModal extends Component{
 
@@ -12,6 +13,10 @@ class StudentModal extends Component{
         let url = "http://localhost:8080/students/add"
         fetch(url, requestOptions)
             .then(response => console.log(response));
+        this.props.setOpen(false)
+        this.props.history.push("/students")
+        let alert = {title: 'Success', message: 'Student Created', type: 'positive ', alertState: true}
+        this.props.createAlert(alert);
       }
 
     putStudent(){
@@ -24,6 +29,10 @@ class StudentModal extends Component{
         let url = "http://localhost:8080/students/update/"+student.id
         fetch(url, requestOptions)
             .then(response => console.log(response));
+        this.props.setOpen(false)
+        this.props.history.push("/students")
+        let alert = {title: 'Success', message: 'Student info updated', type: 'positive ', alertState: true}
+        this.props.createAlert(alert);
     }
 
     handlePost(){
@@ -96,4 +105,4 @@ class StudentModal extends Component{
     }
 }
 
-export default StudentModal;
+export default withRouter(StudentModal);
