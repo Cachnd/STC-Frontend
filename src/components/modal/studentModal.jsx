@@ -6,14 +6,12 @@ class StudentModal extends Component{
     constructor(props){
         super(props)
         this.state = { 
-            open: false, 
-            student: { firstName: '', lastName: '', id: '' }
+            student: this.props.student
         }
         this.handleChange = this.handleChange.bind(this);
     }
 
     postNewStudent(){
-        console.log(JSON.stringify(this.state.student))
         const requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -22,6 +20,19 @@ class StudentModal extends Component{
         let url = "http://localhost:8080/students/add"
         fetch(url, requestOptions)
             .then(response => console.log(response));
+      }
+
+      getStudent(id){
+        let query = "http://localhost:8080/students/get/"+id
+        fetch(query)
+            .then(res => res.json())
+            .then(
+            (result) => {
+                this.setState({ student: result});
+            },
+            (error) => {
+                console.log(error);
+            })
       }
 
       handleChange(event) {
@@ -35,11 +46,12 @@ class StudentModal extends Component{
       }
 
     render (){
+        let student = this.props.student
         return (
             <Modal
                 onClose={() => this.props.setOpen(false)}
                 onOpen={() => this.props.setOpen(true)}
-                open={this.props.open}        
+                open={this.props.open}
                 >
                 <Modal.Header>Created a New Student</Modal.Header>
                 <Modal.Content>
@@ -50,7 +62,7 @@ class StudentModal extends Component{
                             <input
                                 name="firstName"  
                                 placeholder='First Name' 
-                                value={this.state.student.firstName}
+                                value={student.firstName}
                                 onChange={this.handleChange}
                             />
                         </Form.Field>
@@ -59,7 +71,7 @@ class StudentModal extends Component{
                             <input
                                 name='lastName'
                                 placeholder='Last Name' 
-                                value={this.state.student.lastName}
+                                value={student.lastName}
                                 onChange={this.handleChange}
                             />
                         </Form.Field>
@@ -84,13 +96,3 @@ class StudentModal extends Component{
 }
 
 export default StudentModal;
-
-
-
-
-
-
-
-
-
-

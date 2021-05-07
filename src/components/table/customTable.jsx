@@ -5,7 +5,8 @@ import StudentModal from '../modal/index'
 class CustomTable extends React.Component{
 
   state = { students: [{firstName: null, lastName: null, id: null}] ,
-            newStudentModal: false
+            newStudentModal: false,
+            selectedStudent: { firstName: '', lastName: '', id: '' }
           }
 
   componentDidMount() {
@@ -19,15 +20,34 @@ class CustomTable extends React.Component{
         .then(
         (result) => {
             this.setState({ students: result});
-            console.log(result);
         },
         (error) => {
             console.log(error);
         })
   }
 
-  newStudentModalSet = (state) => {
-    this.setState({newStudentModal: state})
+  getStudent(id){
+    let query = "http://localhost:8080/students/get/"+id
+    fetch(query)
+        .then(res => res.json())
+        .then(
+        (result) => {
+            console.log(result)
+            this.setState({ selectedStudent: result, newStudentModal: true});
+        },
+        (error) => {
+            console.log(error);
+        })
+  }
+
+  openStudentModal = (open, studentId) => {
+    console.log(this.state.selectedStudent)
+    if (typeof studentId != "undefined"){
+      this.getStudent(studentId, open)
+    }
+    else{
+      this.setState({newStudentModal: open, selectedStudent: {}})
+    }
   }
 
 
@@ -36,6 +56,7 @@ class CustomTable extends React.Component{
     render(){
       const students = this.state.students;
       const newStudentModal = this.state.newStudentModal;
+      const selectedStudent = this.state.selectedStudent;
         return(
           <Segment>
             <div>
@@ -44,11 +65,11 @@ class CustomTable extends React.Component{
                 labelPosition='left'
                 primary
                 size='small'
-                onClick={() => this.newStudentModalSet(true)}
+                onClick={() => this.openStudentModal(true)}
               >
-                <Icon name='user'/> New Student
+                <Icon name='user'/>New Student
               </Button>
-              <StudentModal open={newStudentModal} setOpen={this.newStudentModalSet} />
+              <StudentModal open={newStudentModal} student={selectedStudent} setOpen={this.openStudentModal} />
             </div>
             <Table compact celled>
               <Table.Header>
@@ -64,8 +85,16 @@ class CustomTable extends React.Component{
                   <Table.Row key={student.id}>
                     <Table.Cell>{student.firstName}</Table.Cell>
                     <Table.Cell>{student.lastName}</Table.Cell>
-                    <Table.Cell colSpan='1'>Icon</Table.Cell>
-                    <Table.Cell colSpan='1'>Icon</Table.Cell>
+                    <Table.Cell collapsing>
+                      <Button basic onClick={() => this.openStudentModal(true, student.id)}>
+                        <Icon name='edit'/>Edit
+                      </Button>
+                    </Table.Cell>
+                    <Table.Cell collapsing>
+                      <Button basic negative>
+                        <Icon name='trash'/>Delete
+                      </Button>
+                    </Table.Cell>
                   </Table.Row> 
                 )}             
               </Table.Body>        
