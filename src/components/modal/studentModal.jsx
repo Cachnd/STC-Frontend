@@ -7,7 +7,7 @@ class StudentModal extends Component{
         const requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(this.state.student)
+            body: JSON.stringify(this.props.student)
         }
         let url = "http://localhost:8080/students/add"
         fetch(url, requestOptions)
@@ -15,17 +15,23 @@ class StudentModal extends Component{
       }
 
     putStudent(){
+        let student = this.props.student
         const requestOptions = {
             method: 'PUT',
-            headers: { 'Conten-Type': 'application/json' },
-            body: JSON.stringify(this.state.student)
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(student)
         }
-        let url = "http://localhost:8080/students/update"
+        let url = "http://localhost:8080/students/update/"+student.id
         fetch(url, requestOptions)
             .then(response => console.log(response));
     }
 
-    
+    handlePost(){
+        if (this.props.student.id === '')
+            this.postNewStudent()
+        else
+            this.putStudent()
+    }
 
     getStudent(id){
         let query = "http://localhost:8080/students/get/"+id
@@ -80,8 +86,8 @@ class StudentModal extends Component{
                         negative
                     />
                     <Button
-                        content="Add New Student"
-                        onClick={() => this.postNewStudent()}
+                        content={(this.props.student.id === '')?"Add New Student":"Edit Information"}
+                        onClick={() => this.handlePost()}
                         positive
                     />
                 </Modal.Actions>

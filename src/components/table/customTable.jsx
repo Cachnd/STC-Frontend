@@ -9,7 +9,7 @@ class CustomTable extends React.Component{
     this.state = { students: [{firstName: null, lastName: null, id: null}] ,
                   newStudentModal: false,
                   selectedStudent: { firstName: '', lastName: '', id: '' }
-                 }  
+                 }
     this.handleChange = this.handleChange.bind(this);
   }
 
@@ -45,12 +45,14 @@ class CustomTable extends React.Component{
   }
 
   openStudentModal = (open, studentId) => {
-    console.log(this.state.selectedStudent)
     if (typeof studentId != "undefined"){
       this.getStudent(studentId, open)
     }
     else{
-      this.setState({newStudentModal: open, selectedStudent: {}})
+      this.setState({
+        newStudentModal: open, 
+        selectedStudent: { firstName: '', lastName: '', id: '' }
+      })
     }
   }
 
