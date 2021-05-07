@@ -1,14 +1,17 @@
 import React from 'react'
 import { Table, Button, Icon, Segment } from 'semantic-ui-react';
 import StudentModal from '../modal/index'
+import Message from '../message/index'
 
 class CustomTable extends React.Component{
 
   constructor(props){
     super(props)
     this.state = { students: [{firstName: null, lastName: null, id: null}] ,
-                  newStudentModal: false,
-                  selectedStudent: { firstName: '', lastName: '', id: '' }
+                  openStudentModal: false,
+                  alertState: true,
+                  selectedStudent: {firstName: '', lastName: '', id: ''},
+                  alert: {title: '', text: '', type: ''}
                  }
     this.handleChange = this.handleChange.bind(this);
   }
@@ -37,7 +40,7 @@ class CustomTable extends React.Component{
         .then(
         (result) => {
             console.log(result)
-            this.setState({ selectedStudent: result, newStudentModal: true});
+            this.setState({ selectedStudent: result, openStudentModal: true});
         },
         (error) => {
             console.log(error);
@@ -50,7 +53,7 @@ class CustomTable extends React.Component{
     }
     else{
       this.setState({
-        newStudentModal: open, 
+        openStudentModal: open, 
         selectedStudent: { firstName: '', lastName: '', id: '' }
       })
     }
@@ -64,17 +67,25 @@ class CustomTable extends React.Component{
             [event.target.name]: value
         }
     }));
-}
+  }
+
+  handleAlert = (state) => {
+    this.setState({alertState: state})
+  }
 
 
 //The warning for "findDOMNode is deprecated in StrictMode" it's on the Button component 
 
     render(){
-      const students = this.state.students;
-      const newStudentModal = this.state.newStudentModal;
-      const selectedStudent = this.state.selectedStudent;
+      let students = this.state.students
+      let openStudentModal = this.state.openStudentModal
+      let selectedStudent = this.state.selectedStudent
+      let alertState = this.state.alertState
         return(
           <Segment>
+            <Message title="A" message="aaa" type="negative" state={alertState}
+              setOpen={this.handleAlert}
+            />
             <div>
               <Button
                 icon
@@ -85,7 +96,7 @@ class CustomTable extends React.Component{
               >
                 <Icon name='user'/>New Student
               </Button>
-              <StudentModal open={newStudentModal} student={selectedStudent} 
+              <StudentModal open={openStudentModal} student={selectedStudent} 
                 setOpen={this.openStudentModal}
                 handleChange={this.handleChange}
                 />
