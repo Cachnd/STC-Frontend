@@ -3,10 +3,10 @@ import React from 'react'
 class CustomMessage extends React.Component{
 
     render (){
-        let title = this.props.title
-        let message = this.props.message
-        let type = this.props.type
-        let state = this.props.state
+        let title = this.props.alertData.title
+        let message = this.props.alertData.message
+        let type = this.props.alertData.type
+        let state = this.props.alertData.alertState
         return(
             <div className={"ui message " + type} style={{display: (state)?"block":"none"}}>
                 <i aria-hidden="true" className="close icon" onClick={() => this.props.setOpen(false)}></i>
