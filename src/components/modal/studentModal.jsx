@@ -3,14 +3,6 @@ import { Button, Form, Modal } from 'semantic-ui-react'
 
 class StudentModal extends Component{
 
-    constructor(props){
-        super(props)
-        this.state = { 
-            student: this.props.student
-        }
-        this.handleChange = this.handleChange.bind(this);
-    }
-
     postNewStudent(){
         const requestOptions = {
             method: 'POST',
@@ -22,7 +14,20 @@ class StudentModal extends Component{
             .then(response => console.log(response));
       }
 
-      getStudent(id){
+    putStudent(){
+        const requestOptions = {
+            method: 'PUT',
+            headers: { 'Conten-Type': 'application/json' },
+            body: JSON.stringify(this.state.student)
+        }
+        let url = "http://localhost:8080/students/update"
+        fetch(url, requestOptions)
+            .then(response => console.log(response));
+    }
+
+    
+
+    getStudent(id){
         let query = "http://localhost:8080/students/get/"+id
         fetch(query)
             .then(res => res.json())
@@ -33,17 +38,7 @@ class StudentModal extends Component{
             (error) => {
                 console.log(error);
             })
-      }
-
-      handleChange(event) {
-        const value = event.target.value;
-        this.setState(prevState => ({
-            student: {
-                ...prevState.student,
-                [event.target.name]: value
-            }
-        }));
-      }
+    }
 
     render (){
         let student = this.props.student
@@ -63,7 +58,7 @@ class StudentModal extends Component{
                                 name="firstName"  
                                 placeholder='First Name' 
                                 value={student.firstName}
-                                onChange={this.handleChange}
+                                onChange={this.props.handleChange}
                             />
                         </Form.Field>
                         <Form.Field>
@@ -72,7 +67,7 @@ class StudentModal extends Component{
                                 name='lastName'
                                 placeholder='Last Name' 
                                 value={student.lastName}
-                                onChange={this.handleChange}
+                                onChange={this.props.handleChange}
                             />
                         </Form.Field>
                     </Form>

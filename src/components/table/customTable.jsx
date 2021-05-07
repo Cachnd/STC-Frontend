@@ -4,10 +4,14 @@ import StudentModal from '../modal/index'
 
 class CustomTable extends React.Component{
 
-  state = { students: [{firstName: null, lastName: null, id: null}] ,
-            newStudentModal: false,
-            selectedStudent: { firstName: '', lastName: '', id: '' }
-          }
+  constructor(props){
+    super(props)
+    this.state = { students: [{firstName: null, lastName: null, id: null}] ,
+                  newStudentModal: false,
+                  selectedStudent: { firstName: '', lastName: '', id: '' }
+                 }  
+    this.handleChange = this.handleChange.bind(this);
+  }
 
   componentDidMount() {
     this.getStudentList();
@@ -50,6 +54,16 @@ class CustomTable extends React.Component{
     }
   }
 
+  handleChange(event) {
+    const value = event.target.value;
+    this.setState(prevState => ({
+        selectedStudent: {
+            ...prevState.selectedStudent,
+            [event.target.name]: value
+        }
+    }));
+}
+
 
 //The warning for "findDOMNode is deprecated in StrictMode" it's on the Button component 
 
@@ -69,7 +83,10 @@ class CustomTable extends React.Component{
               >
                 <Icon name='user'/>New Student
               </Button>
-              <StudentModal open={newStudentModal} student={selectedStudent} setOpen={this.openStudentModal} />
+              <StudentModal open={newStudentModal} student={selectedStudent} 
+                setOpen={this.openStudentModal}
+                handleChange={this.handleChange}
+                />
             </div>
             <Table compact celled>
               <Table.Header>
