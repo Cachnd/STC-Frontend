@@ -1,55 +1,55 @@
 import React, { Component } from 'react';
 import { Button, Form, Modal } from 'semantic-ui-react'
 
-class StudentModal extends Component{
+class ClassModal extends Component{
 
-    postNewStudent(){
+    postNewClass(){
         const requestOptions = {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(this.props.student)
+            body: JSON.stringify(this.props.class)
         }
-        let url = "http://localhost:8080/students/add"
+        let url = "http://localhost:8080/classes/add"
         fetch(url, requestOptions)
             .then(response => {
                 console.log(response)
                 this.props.setOpen(false)
-                let alert = {title: 'Success', message: 'Student Created', type: 'positive ', alertState: true}
+                let alert = {title: 'Success', message: 'Class Created', type: 'positive ', alertState: true}
                 this.props.createAlert(alert)
             });
     }
 
-    putStudent(){
-        let student = this.props.student
+    putClass(){
+        let classroom = this.props.class
         const requestOptions = {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(student)
+            body: JSON.stringify(classroom)
         }
-        let url = "http://localhost:8080/students/update/"+student.id
+        let url = "http://localhost:8080/classes/update/"+classroom.code
         fetch(url, requestOptions)
             .then(response => {
                 console.log(response)                
                 this.props.setOpen(false)
-                let alert = {title: 'Success', message: 'Student info updated', type: 'positive ', alertState: true}
+                let alert = {title: 'Success', message: 'Class info updated', type: 'positive ', alertState: true}
                 this.props.createAlert(alert)
             });
     }
 
     handlePost(){
-        if (this.props.student.id === '')
-            this.postNewStudent()
+        if (this.props.class.code === '')
+            this.postNewClass()
         else
-            this.putStudent()
+            this.putClass()
     }
 
-    getStudent(id){
-        let query = "http://localhost:8080/students/get/"+id
+    getClass(code){
+        let query = "http://localhost:8080/classes/get/"+code
         fetch(query)
             .then(res => res.json())
             .then(
             (result) => {
-                this.setState({ student: result});
+                this.setState({ class: result});
             },
             (error) => {
                 console.log(error);
@@ -57,32 +57,32 @@ class StudentModal extends Component{
     }
 
     render (){
-        let student = this.props.student
+        let classroom = this.props.class
         return (
             <Modal
                 onClose={() => this.props.setOpen(false)}
                 onOpen={() => this.props.setOpen(true)}
                 open={this.props.open}
                 >
-                <Modal.Header>{(this.props.student.id === '')?"Create a new Student":"Edit Information"}</Modal.Header>
+                <Modal.Header>{(this.props.class.code === '')?"Create a new Class":"Edit Information"}</Modal.Header>
                 <Modal.Content>
                     <Modal.Description>
                     <Form>
                         <Form.Field>
-                            <label>First Name</label>
+                            <label>Title</label>
                             <input
-                                name="firstName"  
-                                placeholder='First Name' 
-                                value={student.firstName}
+                                name="title"  
+                                placeholder='Title' 
+                                value={classroom.title}
                                 onChange={this.props.handleChange}
                             />
                         </Form.Field>
                         <Form.Field>
-                            <label>Last Name</label>
+                            <label>Description</label>
                             <input
-                                name='lastName'
-                                placeholder='Last Name' 
-                                value={student.lastName}
+                                name='description'
+                                placeholder='Description' 
+                                value={classroom.description}
                                 onChange={this.props.handleChange}
                             />
                         </Form.Field>
@@ -96,7 +96,7 @@ class StudentModal extends Component{
                         negative
                     />
                     <Button
-                        content={(this.props.student.id === '')?"Add New Student":"Edit Information"}
+                        content={(this.props.class.code === '')?"Add New Class":"Edit Information"}
                         onClick={() => this.handlePost()}
                         positive
                     />
@@ -106,4 +106,4 @@ class StudentModal extends Component{
     }
 }
 
-export default StudentModal;
+export default ClassModal
