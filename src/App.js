@@ -1,24 +1,20 @@
-import logo from './logo.svg';
 import './App.css';
+import { BrowserRouter, Route, Switch } from 'react-router-dom';
+import React, { Fragment } from 'react';
+import {Homepage, Students, Classes} from './components/layout/index'
+import 'semantic-ui-css/semantic.min.css';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Fragment>      
+      <BrowserRouter basename={process.env.REACT_APP_ROUTER_BASE || ''}>
+          <Switch>
+              <Route exact path="/" component={Homepage} />
+              <Route path="/students" component={Students}/>
+              <Route path="/classes" component={Classes}/>
+          </Switch>
+      </BrowserRouter>
+    </Fragment>
   );
 }
 
