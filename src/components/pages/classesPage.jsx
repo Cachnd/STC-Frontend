@@ -113,7 +113,14 @@ class ClassesPage extends React.Component{
             .then(response => {
               console.log(response)
               this.deleteModalState(false)
-              let alert = {title: 'Success', message: 'Class Deleted', type: 'positive', alertState: true}
+              let alert = {}
+              if (response.status !== 204){
+                alert = {title: 'Error', message: 'Class can\'t be Deleted it was assigned to at least one Student', 
+                          type: 'negative', alertState: true}
+              }
+              else {
+                alert = {title: 'Success', message: 'Student Deleted', type: 'positive', alertState: true}
+              } 
               this.createAlert(alert);                  
             });
   }
