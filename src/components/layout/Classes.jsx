@@ -1,6 +1,7 @@
 import React, { Component, Fragment } from 'react';
-import { Segment } from 'semantic-ui-react'
 import Header from '../header/index'
+import ClassesPage from '../pages/classesPage';
+
 
 class Classes extends Component {
 
@@ -8,7 +9,7 @@ class Classes extends Component {
     return(      
       <Fragment>
         <Header/>
-        <Segment>Classes</Segment>
+        <ClassesPage/>
       </Fragment>
     )
   }
