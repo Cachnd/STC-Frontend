@@ -99,18 +99,17 @@ class StudentsPage extends React.Component{
   }
 
   handleDelete () {
-    console.log("DELETE")
-        const requestOptions = {
-            method: 'DELETE',
-        }
-        let url = "http://localhost:8080/students/delete/"+this.state.deleteModal.id
-        fetch(url, requestOptions)
-            .then(response => {
-              console.log(response)
-              this.deleteModalState(false)
-              let alert = {title: 'Success', message: 'Student Deleted', type: 'positive', alertState: true}
-              this.createAlert(alert);                  
-            });
+    const requestOptions = {
+        method: 'DELETE',
+    }
+    let url = "http://localhost:8080/students/delete/"+this.state.deleteModal.id
+    fetch(url, requestOptions)
+        .then(response => {
+          console.log(response)
+          this.deleteModalState(false)
+          let alert = {title: 'Success', message: 'Student Deleted', type: 'positive', alertState: true}
+          this.createAlert(alert);                  
+        });
   }
 
   createAlert = (alert) => {

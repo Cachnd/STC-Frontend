@@ -2,6 +2,7 @@ import React from 'react'
 import { Table, Button, Icon, Segment } from 'semantic-ui-react';
 import ClassModal from '../modal/classModal'
 import DeleteModal from '../modal/deleteModal'
+import AssignModal from '../modal/assignModal'
 import Message from '../message/index'
 
 class ClassesPage extends React.Component{
@@ -13,11 +14,16 @@ class ClassesPage extends React.Component{
                   selectedClass: {title: '', description: '', code: ''},
                   alert: {title: '', message: '', type: '', alertState: false,},
                   deleteModalState: false,
-                  deleteModal: {title: '', message: '', code: ''}
+                  deleteModal: {title: '', message: '', code: ''},
+                  assignModalOptions: [],
+                  assignModalState: false,
+                  studentId: ''
                  }
     this.handleChange = this.handleChange.bind(this);
     this.handleDelete = this.handleDelete.bind(this);
     this.getClassesList = this.getClassesList.bind(this);
+    this.handleAssign = this.handleAssign.bind(this);
+    this.handleSelect = this.handleSelect.bind(this);
   }
 
   componentDidMount() {
@@ -117,6 +123,72 @@ class ClassesPage extends React.Component{
     this.getClassesList()
   }
 
+  getClassToAssign (code){
+    let query = "http://localhost:8080/classes/get/"+code
+    fetch(query)
+        .then(res => res.json())
+        .then(
+        (result) => {
+            console.log(result)
+            this.setState({ selectedClass: result, assignModalState: true});
+        },
+        (error) => {
+            console.log(error);
+        })
+    query = "http://localhost:8080/students/all"
+    fetch(query)
+        .then(res => res.json())
+        .then(
+        (result) => {
+            console.log(result)
+            let options = []
+            let index = ''
+            let student = {id: '', firstName: '', lastName: ''}
+            for (index in result){
+              student = result[index]
+              options.push({key: student.id, value: student.id, text: student.firstName+" "+student.lastName})
+            }
+            this.setState({ assignModalOptions: options});
+        },
+        (error) => {
+            console.log(error);
+        })
+  }
+
+  assignModalState = (state, code) => {
+    if (typeof code != "undefined"){
+      this.getClassToAssign(code)
+    }
+    else{
+      this.setState({
+        assignModalState: state, 
+        selectedClass: { title: '', description: '', code: '' }
+      })
+    }
+  }
+
+  handleAssign (id) {
+    const requestOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({class_code: this.state.selectedClass.code, student_id: this.state.studentId})
+    }
+    let url = "http://localhost:8080/classes/assign/"
+    fetch(url, requestOptions)
+        .then(response => {
+          console.log(response)
+          this.assignModalState(false)
+          let alert = {title: 'Success', message: 'Student Assigned', type: 'positive', alertState: true}
+          this.createAlert(alert);
+        });
+  }
+
+  handleSelect(event, data) {
+    const { value } = data;
+    const { key } = data.options.find(o => o.value === value);
+    this.setState({studentId: key})
+  }
+
 
 //The warning for "findDOMNode is deprecated in StrictMode" it's on the Button component 
 
@@ -127,6 +199,7 @@ class ClassesPage extends React.Component{
       let selectedClass = this.state.selectedClass
       let deleteModal = this.state.deleteModal
       let alert = this.state.alert
+      let assignModalState = this.state.assignModalState
         return(
           <Segment>
             <Message alertData={alert}
@@ -153,6 +226,13 @@ class ClassesPage extends React.Component{
                 handleDelete={this.handleDelete}
                 data={deleteModal}
               />
+              <AssignModal open={assignModalState}
+                  setOpen={this.assignModalState}
+                  class={selectedClass}
+                  options={this.state.assignModalOptions}
+                  handlePost={this.handleAssign}
+                  handleChange={this.handleSelect}
+              />
             </div>
             <Table compact celled>
               <Table.Header>
@@ -171,6 +251,11 @@ class ClassesPage extends React.Component{
                     <Table.Cell collapsing>
                       <Button basic onClick={() => this.editModalState(true, classroom.code)}>
                         <Icon name='edit'/>Edit
+                      </Button>
+                    </Table.Cell>
+                    <Table.Cell collapsing>
+                      <Button basic onClick={() => this.assignModalState(true, classroom.code)}>
+                        <Icon name='list alternate outline'/>Assign
                       </Button>
                     </Table.Cell>
                     <Table.Cell collapsing>
