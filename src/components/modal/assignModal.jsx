@@ -1,11 +1,7 @@
 import React, { Component } from 'react';
 import { Button, Dropdown, Form, Modal } from 'semantic-ui-react'
 
-class AssignModal extends Component{
-        
-    handlePost(){
-        console.log("post")
-    }
+class AssignModal extends Component{        
 
     render (){
         return (
@@ -25,6 +21,7 @@ class AssignModal extends Component{
                                 selection
                                 search
                                 options={this.props.options}
+                                onChange={this.props.handleChange}
                            />                           
                         </Form.Field>                      
                     </Form>
@@ -38,7 +35,7 @@ class AssignModal extends Component{
                     />
                     <Button
                         content="Assign"
-                        onClick={() => this.handlePost()}
+                        onClick={this.props.handlePost}
                         positive
                     />
                 </Modal.Actions>

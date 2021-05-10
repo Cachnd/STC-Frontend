@@ -16,11 +16,14 @@ class ClassesPage extends React.Component{
                   deleteModalState: false,
                   deleteModal: {title: '', message: '', code: ''},
                   assignModalOptions: [],
-                  assignModalState: false
+                  assignModalState: false,
+                  studentId: ''
                  }
     this.handleChange = this.handleChange.bind(this);
     this.handleDelete = this.handleDelete.bind(this);
     this.getClassesList = this.getClassesList.bind(this);
+    this.handleAssign = this.handleAssign.bind(this);
+    this.handleSelect = this.handleSelect.bind(this);
   }
 
   componentDidMount() {
@@ -164,6 +167,28 @@ class ClassesPage extends React.Component{
     }
   }
 
+  handleAssign (id) {
+    const requestOptions = {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({class_code: this.state.selectedClass.code, student_id: this.state.studentId})
+    }
+    let url = "http://localhost:8080/classes/assign/"
+    fetch(url, requestOptions)
+        .then(response => {
+          console.log(response)
+          this.assignModalState(false)
+          let alert = {title: 'Success', message: 'Student Assigned', type: 'positive', alertState: true}
+          this.createAlert(alert);
+        });
+  }
+
+  handleSelect(event, data) {
+    const { value } = data;
+    const { key } = data.options.find(o => o.value === value);
+    this.setState({studentId: key})
+  }
+
 
 //The warning for "findDOMNode is deprecated in StrictMode" it's on the Button component 
 
@@ -205,6 +230,8 @@ class ClassesPage extends React.Component{
                   setOpen={this.assignModalState}
                   class={selectedClass}
                   options={this.state.assignModalOptions}
+                  handlePost={this.handleAssign}
+                  handleChange={this.handleSelect}
               />
             </div>
             <Table compact celled>
