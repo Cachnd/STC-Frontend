@@ -1,6 +1,7 @@
 import React from 'react'
 import { Table, Button, Icon, Segment } from 'semantic-ui-react';
-import StudentModal from '../modal/index'
+import StudentModal from '../modal/studentModal'
+import DeleteModal from '../modal/deleteModal'
 import Message from '../message/index'
 
 class StudentsPage extends React.Component{
@@ -10,9 +11,13 @@ class StudentsPage extends React.Component{
     this.state = { students: [{firstName: null, lastName: null, id: null}] ,
                   editModalState: false,
                   selectedStudent: {firstName: '', lastName: '', id: ''},
-                  alert: {title: '', message: '', type: '', alertState: false,}
+                  alert: {title: '', message: '', type: '', alertState: false,},
+                  deleteModalState: false,
+                  deleteModal: {title: '', message: '', id: ''}
                  }
     this.handleChange = this.handleChange.bind(this);
+    this.handleDelete = this.handleDelete.bind(this);
+    this.getStudentList = this.getStudentList.bind(this);
   }
 
   componentDidMount() {
@@ -74,11 +79,43 @@ class StudentsPage extends React.Component{
           ...prevState.alert,
           alertState: state
       }
-  }));
+    }));
+  }
+
+  deleteModalState = (state, student) => {
+    if (typeof student == "undefined"){
+      this.setState({deleteModalState: state})
+    }
+    else
+      this.setState(prevState => ({
+        deleteModal: {
+            title: "Delete",
+            message: "Are you sure you want to Delete: "  + 
+                      student.firstName + " " + student.lastName,
+            id: student.id
+        },
+        deleteModalState: state
+      }));   
+  }
+
+  handleDelete () {
+    console.log("DELETE")
+        const requestOptions = {
+            method: 'DELETE',
+        }
+        let url = "http://localhost:8080/students/delete/"+this.state.deleteModal.id
+        fetch(url, requestOptions)
+            .then(response => {
+              console.log(response)
+              this.deleteModalState(false)
+              let alert = {title: 'Success', message: 'Student Deleted', type: 'positive', alertState: true}
+              this.createAlert(alert);                  
+            });
   }
 
   createAlert = (alert) => {
-    this.setState({alert: alert});
+    this.setState({alert: alert})
+    this.getStudentList()
   }
 
 
@@ -87,7 +124,9 @@ class StudentsPage extends React.Component{
     render(){
       let students = this.state.students
       let editModalState = this.state.editModalState
+      let deleteModalState = this.state.deleteModalState
       let selectedStudent = this.state.selectedStudent
+      let deleteModal = this.state.deleteModal
       let alert = this.state.alert
         return(
           <Segment>
@@ -108,7 +147,13 @@ class StudentsPage extends React.Component{
                 setOpen={this.editModalState}
                 handleChange={this.handleChange}
                 createAlert={this.createAlert}
-                />
+                update={this.getStudentList}
+              />
+              <DeleteModal open={deleteModalState}
+                setOpen={this.deleteModalState}
+                handleDelete={this.handleDelete}
+                data={deleteModal}
+              />
             </div>
             <Table compact celled>
               <Table.Header>
@@ -130,7 +175,7 @@ class StudentsPage extends React.Component{
                       </Button>
                     </Table.Cell>
                     <Table.Cell collapsing>
-                      <Button basic negative>
+                      <Button basic negative onClick={() => this.deleteModalState(true, student)}>
                         <Icon name='trash'/>Delete
                       </Button>
                     </Table.Cell>
