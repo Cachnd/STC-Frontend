@@ -1,20 +1,22 @@
 import React from 'react'
-import { Table, Button, Icon, Segment } from 'semantic-ui-react';
+import { Button, Icon, Segment } from 'semantic-ui-react';
 import StudentModal from '../modal/studentModal'
 import DeleteModal from '../modal/deleteModal'
 import Message from '../message/index'
 import axios from 'axios'
+import CustomTable from '../table/customTable';
 
 class StudentsPage extends React.Component{
 
   constructor(props){
     super(props)
-    this.state = { students: [{firstName: null, lastName: null, student_id: null}] ,
+    this.state = { data: [],
                   editModalState: false,
                   selectedStudent: {firstName: '', lastName: '', student_id: ''},
                   alert: {title: '', message: '', type: '', alertState: false,},
                   deleteModalState: false,
-                  deleteModal: {title: '', message: '', id: ''}
+                  deleteModal: {title: '', message: '', id: ''},
+                  header: ['First Name', 'Last Name'],
                  }
     this.handleChange = this.handleChange.bind(this);
     this.handleDelete = this.handleDelete.bind(this);
@@ -28,7 +30,14 @@ class StudentsPage extends React.Component{
   getStudentList(){
     axios.get('http://localhost:8080/students/all')
       .then((response) => {
-        this.setState({ students: response.data})
+        let data = []
+        let index = ''
+        let student = {student_id: '', firstName: '', lastName: ''}
+        for (index in response.data){
+          student = response.data[index]
+          data.push([student.student_id, student.firstName, student.lastName])
+        }
+        this.setState({ data: data})
       })
       .catch((error) => {
         console.log(error)
@@ -76,20 +85,22 @@ class StudentsPage extends React.Component{
     }));
   }
 
-  deleteModalState = (state, student) => {
-    if (typeof student == "undefined"){
+  deleteModalState = (state, row) => {
+    if (typeof row == "undefined"){
       this.setState({deleteModalState: state})
     }
-    else
+    else{      
       this.setState(prevState => ({
         deleteModal: {
             title: "Delete",
             message: "Are you sure you want to Delete: "  + 
-                      student.firstName + " " + student.lastName,
-                      student_id: student.student_id
+                      row[1] + " " + row[2],
+            student_id: row[0]
         },
         deleteModalState: state
-      }));   
+      }));
+    }
+      
   }
 
   handleDelete () {
@@ -118,7 +129,6 @@ class StudentsPage extends React.Component{
 //The warning for "findDOMNode is deprecated in StrictMode" it's on the Button component 
 
     render(){
-      let students = this.state.students
       let editModalState = this.state.editModalState
       let deleteModalState = this.state.deleteModalState
       let selectedStudent = this.state.selectedStudent
@@ -151,34 +161,12 @@ class StudentsPage extends React.Component{
                 data={deleteModal}
               />
             </div>
-            <Table compact celled>
-              <Table.Header>
-                <Table.Row>
-                  <Table.HeaderCell>First Name</Table.HeaderCell>
-                  <Table.HeaderCell>Last Name</Table.HeaderCell>
-                  <Table.HeaderCell colSpan='1'>Edit</Table.HeaderCell>
-                  <Table.HeaderCell colSpan='1'>Delete</Table.HeaderCell>
-                </Table.Row>
-              </Table.Header>
-              <Table.Body>
-                {students.map((student) => 
-                  <Table.Row key={student.student_id}>
-                    <Table.Cell>{student.firstName}</Table.Cell>
-                    <Table.Cell>{student.lastName}</Table.Cell>
-                    <Table.Cell collapsing>
-                      <Button basic onClick={() => this.editModalState(true, student.student_id)}>
-                        <Icon name='edit'/>Edit
-                      </Button>
-                    </Table.Cell>
-                    <Table.Cell collapsing>
-                      <Button basic negative onClick={() => this.deleteModalState(true, student)}>
-                        <Icon name='trash'/>Delete
-                      </Button>
-                    </Table.Cell>
-                  </Table.Row> 
-                )}             
-              </Table.Body>        
-            </Table>
+            <CustomTable
+              header = {this.state.header}
+              data = {this.state.data}
+              editFunction = {this.editModalState}
+              deleteFunction = {this.deleteModalState}
+              />
           </Segment>
         )
     }
