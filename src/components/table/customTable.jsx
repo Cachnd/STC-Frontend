@@ -14,6 +14,7 @@ class CustomTable extends Component{
               {header.map((title, index) => 
                 <Table.HeaderCell key={index}>{title}</Table.HeaderCell>
               )}
+              {this.props.assignFunction?<Table.HeaderCell>Assign</Table.HeaderCell>:null}
               {this.props.editFunction?<Table.HeaderCell>Edit</Table.HeaderCell>:null}              
               {this.props.deleteFunction?<Table.HeaderCell>Delete</Table.HeaderCell>:null}
             </Table.Row>
@@ -25,6 +26,13 @@ class CustomTable extends Component{
                   {return (subindex === 0 )?null:<Table.Cell key={subindex}>{column}</Table.Cell>}
                 )}  
 
+                {this.props.assignFunction?
+                <Table.Cell collapsing>
+                  <Button basic onClick={() => this.props.assignFunction(true, row[0])}>
+                    <Icon name='list alternate outline'/>Assign
+                  </Button>
+                </Table.Cell>
+                :null}
                 {this.props.editFunction?
                 <Table.Cell collapsing>
                   <Button basic onClick={() => this.props.editFunction(true, row[0])}>

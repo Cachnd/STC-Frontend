@@ -225,6 +225,7 @@ class ClassesPage extends React.Component{
               data = {this.state.classes}
               editFunction = {this.editModalState}
               deleteFunction = {this.deleteModalState}
+              assignFunction = {this.assignModalState}
               />
           </Segment>
         )
