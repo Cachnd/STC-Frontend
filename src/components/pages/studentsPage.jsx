@@ -4,7 +4,9 @@ import StudentModal from '../modal/studentModal'
 import DeleteModal from '../modal/deleteModal'
 import Message from '../message/index'
 import CustomTable from '../table/index';
+import BigMessage from '../message/bigMessage';
 import axios from 'axios'
+
 
 class StudentsPage extends React.Component{
 
@@ -161,12 +163,15 @@ class StudentsPage extends React.Component{
                 data={deleteModal}
               />
             </div>
-            <CustomTable
-              header = {this.state.header}
-              data = {this.state.students}
-              editFunction = {this.editModalState}
-              deleteFunction = {this.deleteModalState}
-              />
+            {this.state.students.length === 0?
+              <BigMessage message={"There are no Students Registered"}/>
+            : 
+              <CustomTable
+                header = {this.state.header}
+                data = {this.state.students}
+                editFunction = {this.editModalState}
+                deleteFunction = {this.deleteModalState}
+              />}
           </Segment>
         )
     }

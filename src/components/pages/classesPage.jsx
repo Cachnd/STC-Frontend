@@ -5,6 +5,7 @@ import DeleteModal from '../modal/deleteModal'
 import AssignModal from '../modal/assignModal'
 import Message from '../message/index'
 import CustomTable from '../table/index';
+import BigMessage from '../message/bigMessage';
 import axios from 'axios'
 
 class ClassesPage extends React.Component{
@@ -220,13 +221,17 @@ class ClassesPage extends React.Component{
                   handleChange={this.handleSelect}
               />
             </div>
-            <CustomTable
-              header = {this.state.header}
-              data = {this.state.classes}
-              editFunction = {this.editModalState}
-              deleteFunction = {this.deleteModalState}
-              assignFunction = {this.assignModalState}
-              />
+            {this.state.classes.length === 0?
+              <BigMessage message={"There are no Classes Registered"}/>
+            : 
+              <CustomTable
+                header = {this.state.header}
+                data = {this.state.classes}
+                editFunction = {this.editModalState}
+                deleteFunction = {this.deleteModalState}
+                assignFunction = {this.assignModalState}
+                />
+            }
           </Segment>
         )
     }
