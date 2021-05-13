@@ -1,16 +1,17 @@
 import React from 'react'
-import { Table, Button, Icon, Segment } from 'semantic-ui-react';
+import { Button, Icon, Segment } from 'semantic-ui-react';
 import ClassModal from '../modal/classModal'
 import DeleteModal from '../modal/deleteModal'
 import AssignModal from '../modal/assignModal'
 import Message from '../message/index'
+import CustomTable from '../table/index';
 import axios from 'axios'
 
 class ClassesPage extends React.Component{
 
   constructor(props){
     super(props)
-    this.state = { classes: [{title: null, description: null, class_code: null}] ,
+    this.state = { classes: [] ,
                   editModalState: false,
                   selectedClass: {title: '', description: '', class_code: ''},
                   alert: {title: '', message: '', type: '', alertState: false,},
@@ -18,7 +19,8 @@ class ClassesPage extends React.Component{
                   deleteModal: {title: '', message: '', class_code: ''},
                   assignModalOptions: [],
                   assignModalState: false,
-                  studentId: ''
+                  studentId: '',
+                  header: ['Title', 'Description'],
                  }
     this.handleChange = this.handleChange.bind(this);
     this.handleDelete = this.handleDelete.bind(this);
@@ -34,8 +36,15 @@ class ClassesPage extends React.Component{
   getClassesList(){
     axios.get('http://localhost:8080/classes/all')
         .then((response) => {
-          this.setState({ classes: response.data})
-        })
+          let classes = []
+          let index = ''
+          let classroom = {class_code: '', title: '', description: ''}
+          for (index in response.data){
+            classroom = response.data[index]
+            classes.push([classroom.class_code, classroom.title, classroom.description])
+          }
+          this.setState({ classes: classes})
+          })
         .catch((error) => {
           console.log(error)
         })
@@ -82,16 +91,16 @@ class ClassesPage extends React.Component{
     }));
   }
 
-  deleteModalState = (state, classroom) => {
-    if (typeof classroom == "undefined"){
+  deleteModalState = (state, row) => {
+    if (typeof row == "undefined"){
       this.setState({deleteModalState: state})
     }
     else
       this.setState(prevState => ({
         deleteModal: {
             title: "Delete",
-            message: "Are you sure you want to Delete: " + classroom.title,
-            class_code: classroom.class_code
+            message: "Are you sure you want to Delete: " + row[1],
+            class_code: row[0]
         },
         deleteModalState: state
       }));   
@@ -171,7 +180,6 @@ class ClassesPage extends React.Component{
 //The warning for "findDOMNode is deprecated in StrictMode" it's on the Button component 
 
     render(){
-      let classes = this.state.classes
       let editModalState = this.state.editModalState
       let deleteModalState = this.state.deleteModalState
       let selectedClass = this.state.selectedClass
@@ -212,39 +220,12 @@ class ClassesPage extends React.Component{
                   handleChange={this.handleSelect}
               />
             </div>
-            <Table compact celled>
-              <Table.Header>
-                <Table.Row>
-                  <Table.HeaderCell>Title</Table.HeaderCell>
-                  <Table.HeaderCell>Description</Table.HeaderCell>
-                  <Table.HeaderCell colSpan='1'>Edit</Table.HeaderCell>
-                  <Table.HeaderCell colSpan='1'>Delete</Table.HeaderCell>
-                </Table.Row>
-              </Table.Header>
-              <Table.Body>
-                {classes.map((classroom) => 
-                  <Table.Row key={classroom.class_code}>
-                    <Table.Cell>{classroom.title}</Table.Cell>
-                    <Table.Cell>{classroom.description}</Table.Cell>
-                    <Table.Cell collapsing>
-                      <Button basic onClick={() => this.editModalState(true, classroom.class_code)}>
-                        <Icon name='edit'/>Edit
-                      </Button>
-                    </Table.Cell>
-                    <Table.Cell collapsing>
-                      <Button basic onClick={() => this.assignModalState(true, classroom.class_code)}>
-                        <Icon name='list alternate outline'/>Assign
-                      </Button>
-                    </Table.Cell>
-                    <Table.Cell collapsing>
-                      <Button basic negative onClick={() => this.deleteModalState(true, classroom)}>
-                        <Icon name='trash'/>Delete
-                      </Button>
-                    </Table.Cell>
-                  </Table.Row> 
-                )}             
-              </Table.Body>        
-            </Table>
+            <CustomTable
+              header = {this.state.header}
+              data = {this.state.classes}
+              editFunction = {this.editModalState}
+              deleteFunction = {this.deleteModalState}
+              />
           </Segment>
         )
     }

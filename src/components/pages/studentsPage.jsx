@@ -3,14 +3,14 @@ import { Button, Icon, Segment } from 'semantic-ui-react';
 import StudentModal from '../modal/studentModal'
 import DeleteModal from '../modal/deleteModal'
 import Message from '../message/index'
+import CustomTable from '../table/index';
 import axios from 'axios'
-import CustomTable from '../table/customTable';
 
 class StudentsPage extends React.Component{
 
   constructor(props){
     super(props)
-    this.state = { data: [],
+    this.state = { students: [],
                   editModalState: false,
                   selectedStudent: {firstName: '', lastName: '', student_id: ''},
                   alert: {title: '', message: '', type: '', alertState: false,},
@@ -30,14 +30,14 @@ class StudentsPage extends React.Component{
   getStudentList(){
     axios.get('http://localhost:8080/students/all')
       .then((response) => {
-        let data = []
+        let students = []
         let index = ''
         let student = {student_id: '', firstName: '', lastName: ''}
         for (index in response.data){
           student = response.data[index]
-          data.push([student.student_id, student.firstName, student.lastName])
+          students.push([student.student_id, student.firstName, student.lastName])
         }
-        this.setState({ data: data})
+        this.setState({ students: students})
       })
       .catch((error) => {
         console.log(error)
@@ -163,7 +163,7 @@ class StudentsPage extends React.Component{
             </div>
             <CustomTable
               header = {this.state.header}
-              data = {this.state.data}
+              data = {this.state.students}
               editFunction = {this.editModalState}
               deleteFunction = {this.deleteModalState}
               />
