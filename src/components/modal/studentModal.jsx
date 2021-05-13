@@ -1,59 +1,47 @@
+import axios from 'axios';
 import React, { Component } from 'react';
 import { Button, Form, Modal } from 'semantic-ui-react'
 
 class StudentModal extends Component{
 
     postNewStudent(){
-        const requestOptions = {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(this.props.student)
-        }
-        let url = "http://localhost:8080/students"
-        fetch(url, requestOptions)
-            .then(response => {
-                console.log(response)
+        let payload = this.props.student
+        axios.post('http://localhost:8080/students/', payload)
+            .then((response) => {
                 this.props.setOpen(false)
                 let alert = {title: 'Success', message: 'Student Created', type: 'positive ', alertState: true}
                 this.props.createAlert(alert)
-            });
+            })
     }
 
     putStudent(){
         let student = this.props.student
-        const requestOptions = {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(student)
-        }
-        let url = "http://localhost:8080/students/update/"+student.id
-        fetch(url, requestOptions)
-            .then(response => {
-                console.log(response)                
+        axios.put('http://localhost:8080/students/'+student.student_id, student)
+            .then((response) => {
                 this.props.setOpen(false)
                 let alert = {title: 'Success', message: 'Student info updated', type: 'positive ', alertState: true}
-                this.props.createAlert(alert)
-            });
+                this.props.createAlert(alert)                
+            })
+            .catch((error) => {
+                console.log(error)
+            })      
     }
 
     handlePost(){
-        if (this.props.student.id === '')
+        if (this.props.student.student_id === '')
             this.postNewStudent()
         else
             this.putStudent()
     }
 
-    getStudent(id){
-        let query = "http://localhost:8080/students/"+id
-        fetch(query)
-            .then(res => res.json())
-            .then(
-            (result) => {
-                this.setState({ student: result});
-            },
-            (error) => {
-                console.log(error);
+    getStudent(student_id){
+        axios.get('http://localhost:8080/students/'+student_id)
+            .then((response) => {
+                this.setState({ student: response});
             })
+            .catch((error) => {
+                console.log(error)
+            })        
     }
 
     render (){

@@ -3,6 +3,7 @@ import { Table, Button, Icon, Segment } from 'semantic-ui-react';
 import StudentModal from '../modal/studentModal'
 import DeleteModal from '../modal/deleteModal'
 import Message from '../message/index'
+import axios from 'axios'
 
 class StudentsPage extends React.Component{
 
@@ -25,31 +26,23 @@ class StudentsPage extends React.Component{
   }
 
   getStudentList(){
-    let query = "http://localhost:8080/students/all"
-    fetch(query)
-        .then(res => res.json())
-        .then(
-        (result) => {
-            this.setState({ students: result});
-        },
-        (error) => {
-            console.log(error);
-        })
+    axios.get('http://localhost:8080/students/all')
+      .then((response) => {
+        this.setState({ students: response.data})
+      })
+      .catch((error) => {
+        console.log(error)
+      })
   }
 
   getStudent(student_id){
-    let query = "http://localhost:8080/students/"+student_id
-    let options = {method: 'GET'}
-    fetch(query, options)
-        .then(res => res.json())
-        .then(
-        (result) => {
-            console.log(result)
-            this.setState({ selectedStudent: result, editModalState: true});
-        },
-        (error) => {
-            console.log(error);
-        })
+    axios.get('http://localhost:8080/students/'+student_id)
+      .then((response) => {
+        this.setState({ selectedStudent: response.data, editModalState: true })
+      })
+      .catch((error) => {
+        console.log(error)
+      })
   }
 
   editModalState = (state, student_id) => {
@@ -100,24 +93,20 @@ class StudentsPage extends React.Component{
   }
 
   handleDelete () {
-    const requestOptions = {
-        method: 'DELETE',
-    }
-    let url = "http://localhost:8080/students/"+this.state.deleteModal.student_id
-    fetch(url, requestOptions)
-        .then(response => {
-          console.log(response)
-          this.deleteModalState(false)
-          let alert = {}
-          if (response.status !== 204){
-            alert = {title: 'Error', message: 'Student can\'t be Deleted it was Assigned to a Class', 
+    let student_id = this.state.deleteModal.student_id
+    axios.delete('http://localhost:8080/students/' + student_id)
+      .then((response) => {
+        this.deleteModalState(false)
+        let alert = {title: 'Success', message: 'Student Deleted', type: 'positive', alertState: true}
+        this.createAlert(alert)
+      })
+      .catch((error) => {
+        console.log(error)
+        this.deleteModalState(false)
+        let alert = {title: 'Error', message: 'Student can\'t be Deleted it was Assigned to a Class', 
                       type: 'negative', alertState: true}
-          }
-          else {
-            alert = {title: 'Success', message: 'Student Deleted', type: 'positive', alertState: true}
-          }          
-          this.createAlert(alert);                  
-        });
+        this.createAlert(alert)
+      })
   }
 
   createAlert = (alert) => {
