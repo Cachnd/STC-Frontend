@@ -1,23 +1,27 @@
 import React from 'react'
-import { Table, Button, Icon, Segment } from 'semantic-ui-react';
+import { Button, Icon, Segment } from 'semantic-ui-react';
 import ClassModal from '../modal/classModal'
 import DeleteModal from '../modal/deleteModal'
 import AssignModal from '../modal/assignModal'
 import Message from '../message/index'
+import CustomTable from '../table/index';
+import BigMessage from '../message/bigMessage';
+import axios from 'axios'
 
 class ClassesPage extends React.Component{
 
   constructor(props){
     super(props)
-    this.state = { classes: [{title: null, description: null, code: null}] ,
+    this.state = { classes: [] ,
                   editModalState: false,
-                  selectedClass: {title: '', description: '', code: ''},
+                  selectedClass: {title: '', description: '', class_code: ''},
                   alert: {title: '', message: '', type: '', alertState: false,},
                   deleteModalState: false,
-                  deleteModal: {title: '', message: '', code: ''},
+                  deleteModal: {title: '', message: '', class_code: ''},
                   assignModalOptions: [],
                   assignModalState: false,
-                  studentId: ''
+                  studentId: '',
+                  header: ['Title', 'Description'],
                  }
     this.handleChange = this.handleChange.bind(this);
     this.handleDelete = this.handleDelete.bind(this);
@@ -31,40 +35,40 @@ class ClassesPage extends React.Component{
   }
 
   getClassesList(){
-    let query = "http://localhost:8080/classes/all"
-    fetch(query)
-        .then(res => res.json())
-        .then(
-        (result) => {
-            this.setState({ classes: result});
-        },
-        (error) => {
-            console.log(error);
+    axios.get('http://localhost:8080/classes/all')
+        .then((response) => {
+          let classes = []
+          let index = ''
+          let classroom = {class_code: '', title: '', description: ''}
+          for (index in response.data){
+            classroom = response.data[index]
+            classes.push([classroom.class_code, classroom.title, classroom.description])
+          }
+          this.setState({ classes: classes})
+          })
+        .catch((error) => {
+          console.log(error)
         })
   }
 
-  getClass(code){
-    let query = "http://localhost:8080/classes/get/"+code
-    fetch(query)
-        .then(res => res.json())
-        .then(
-        (result) => {
-            console.log(result)
-            this.setState({ selectedClass: result, editModalState: true});
-        },
-        (error) => {
-            console.log(error);
+  getClass(class_code){    
+    axios.get('http://localhost:8080/classes/'+class_code)
+        .then((response) => {
+          this.setState({ selectedClass: response.data, editModalState: true});
+        })
+        .catch((error) => {
+          console.log(error)
         })
   }
 
-  editModalState = (state, code) => {
-    if (typeof code != "undefined"){
-      this.getClass(code, state)
+  editModalState = (state, class_code) => {
+    if (typeof class_code != "undefined"){
+      this.getClass(class_code, state)
     }
     else{
       this.setState({
         editModalState: state, 
-        selectedClass: { title: '', description: '', code: '' }
+        selectedClass: { title: '', description: '', class_code: '' }
       })
     }
   }
@@ -88,41 +92,35 @@ class ClassesPage extends React.Component{
     }));
   }
 
-  deleteModalState = (state, classroom) => {
-    if (typeof classroom == "undefined"){
+  deleteModalState = (state, row) => {
+    if (typeof row == "undefined"){
       this.setState({deleteModalState: state})
     }
     else
       this.setState(prevState => ({
         deleteModal: {
             title: "Delete",
-            message: "Are you sure you want to Delete: " + classroom.title,
-            code: classroom.code
+            message: "Are you sure you want to Delete: " + row[1],
+            class_code: row[0]
         },
         deleteModalState: state
       }));   
   }
 
   handleDelete () {
-    console.log("DELETE")
-        const requestOptions = {
-            method: 'DELETE',
-        }
-        let url = "http://localhost:8080/classes/delete/"+this.state.deleteModal.code
-        fetch(url, requestOptions)
-            .then(response => {
-              console.log(response)
-              this.deleteModalState(false)
-              let alert = {}
-              if (response.status !== 204){
-                alert = {title: 'Error', message: 'Class can\'t be Deleted it was assigned to at least one Student', 
-                          type: 'negative', alertState: true}
-              }
-              else {
-                alert = {title: 'Success', message: 'Student Deleted', type: 'positive', alertState: true}
-              } 
-              this.createAlert(alert);                  
-            });
+    axios.delete('http://localhost:8080/classes/'+this.state.deleteModal.class_code)
+      .then((response) => {
+        this.deleteModalState(false)
+        let alert = {title: 'Success', message: 'Class Deleted', type: 'positive', alertState: true}         
+        this.createAlert(alert)
+      })
+      .catch((error) => {
+        console.log(error)
+        this.deleteModalState(false)
+        let alert = {title: 'Error', type: 'negative', alertState: true,
+                    message: 'Class can\'t be Deleted it was assigned to at least one Student'}                    
+        this.createAlert(alert)
+      })        
   }
 
   createAlert = (alert) => {
@@ -130,64 +128,47 @@ class ClassesPage extends React.Component{
     this.getClassesList()
   }
 
-  getClassToAssign (code){
-    let query = "http://localhost:8080/classes/get/"+code
-    fetch(query)
-        .then(res => res.json())
-        .then(
-        (result) => {
-            console.log(result)
-            this.setState({ selectedClass: result, assignModalState: true});
-        },
-        (error) => {
-            console.log(error);
-        })
-    query = "http://localhost:8080/students/all"
-    fetch(query)
-        .then(res => res.json())
-        .then(
-        (result) => {
-            console.log(result)
-            let options = []
-            let index = ''
-            let student = {id: '', firstName: '', lastName: ''}
-            for (index in result){
-              student = result[index]
-              options.push({key: student.id, value: student.id, text: student.firstName+" "+student.lastName})
-            }
-            this.setState({ assignModalOptions: options});
-        },
-        (error) => {
-            console.log(error);
-        })
+  getClassToAssign (class_code){
+    axios.get('http://localhost:8080/classes/'+class_code)
+      .then((response) => {
+        this.setState({ selectedClass: response.data, assignModalState: true})
+      })
+      .catch((error) => {
+        console.log(error)
+      })
+    axios.get('http://localhost:8080/students/all')
+      .then((response) => {
+        let options = []
+        let index = ''
+        let student = {student_id: '', firstName: '', lastName: ''}
+        for (index in response.data){
+          student = response.data[index]
+          options.push({key: student.student_id, value: student.student_id, text: student.firstName+" "+student.lastName})
+        }
+        this.setState({ assignModalOptions: options})
+      })
   }
 
-  assignModalState = (state, code) => {
-    if (typeof code != "undefined"){
-      this.getClassToAssign(code)
+  assignModalState = (state, class_code) => {
+    if (typeof class_code != "undefined"){
+      this.getClassToAssign(class_code)
     }
     else{
       this.setState({
         assignModalState: state, 
-        selectedClass: { title: '', description: '', code: '' }
+        selectedClass: { title: '', description: '', class_code: '' }
       })
     }
   }
 
-  handleAssign (id) {
-    const requestOptions = {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({class_code: this.state.selectedClass.code, student_id: this.state.studentId})
-    }
-    let url = "http://localhost:8080/classes/assign/"
-    fetch(url, requestOptions)
-        .then(response => {
-          console.log(response)
-          this.assignModalState(false)
-          let alert = {title: 'Success', message: 'Student Assigned', type: 'positive', alertState: true}
-          this.createAlert(alert);
-        });
+  handleAssign () {
+    let payload = {class_code: this.state.selectedClass.class_code, student_id: this.state.studentId}
+    axios.post('http://localhost:8080/classes/assign/', payload)
+      .then((response) => {
+        this.assignModalState(false)
+        let alert = {title: 'Success', message: 'Student Assigned', type: 'positive', alertState: true}
+        this.createAlert(alert);
+      })    
   }
 
   handleSelect(event, data) {
@@ -200,7 +181,6 @@ class ClassesPage extends React.Component{
 //The warning for "findDOMNode is deprecated in StrictMode" it's on the Button component 
 
     render(){
-      let classes = this.state.classes
       let editModalState = this.state.editModalState
       let deleteModalState = this.state.deleteModalState
       let selectedClass = this.state.selectedClass
@@ -241,39 +221,17 @@ class ClassesPage extends React.Component{
                   handleChange={this.handleSelect}
               />
             </div>
-            <Table compact celled>
-              <Table.Header>
-                <Table.Row>
-                  <Table.HeaderCell>Title</Table.HeaderCell>
-                  <Table.HeaderCell>Description</Table.HeaderCell>
-                  <Table.HeaderCell colSpan='1'>Edit</Table.HeaderCell>
-                  <Table.HeaderCell colSpan='1'>Delete</Table.HeaderCell>
-                </Table.Row>
-              </Table.Header>
-              <Table.Body>
-                {classes.map((classroom) => 
-                  <Table.Row key={classroom.code}>
-                    <Table.Cell>{classroom.title}</Table.Cell>
-                    <Table.Cell>{classroom.description}</Table.Cell>
-                    <Table.Cell collapsing>
-                      <Button basic onClick={() => this.editModalState(true, classroom.code)}>
-                        <Icon name='edit'/>Edit
-                      </Button>
-                    </Table.Cell>
-                    <Table.Cell collapsing>
-                      <Button basic onClick={() => this.assignModalState(true, classroom.code)}>
-                        <Icon name='list alternate outline'/>Assign
-                      </Button>
-                    </Table.Cell>
-                    <Table.Cell collapsing>
-                      <Button basic negative onClick={() => this.deleteModalState(true, classroom)}>
-                        <Icon name='trash'/>Delete
-                      </Button>
-                    </Table.Cell>
-                  </Table.Row> 
-                )}             
-              </Table.Body>        
-            </Table>
+            {this.state.classes.length === 0?
+              <BigMessage message={"There are no Classes Registered"}/>
+            : 
+              <CustomTable
+                header = {this.state.header}
+                data = {this.state.classes}
+                editFunction = {this.editModalState}
+                deleteFunction = {this.deleteModalState}
+                assignFunction = {this.assignModalState}
+                />
+            }
           </Segment>
         )
     }

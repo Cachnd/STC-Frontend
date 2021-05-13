@@ -1,58 +1,44 @@
 import React, { Component } from 'react';
 import { Button, Form, Modal } from 'semantic-ui-react'
+import axios from 'axios'
 
 class ClassModal extends Component{
 
     postNewClass(){
-        const requestOptions = {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(this.props.class)
-        }
-        let url = "http://localhost:8080/classes/add"
-        fetch(url, requestOptions)
-            .then(response => {
-                console.log(response)
+        let payload = this.props.class
+        axios.post('http://localhost:8080/classes/', payload)
+            .then((response) => {
                 this.props.setOpen(false)
                 let alert = {title: 'Success', message: 'Class Created', type: 'positive ', alertState: true}
                 this.props.createAlert(alert)
-            });
+            })
     }
 
     putClass(){
-        let classroom = this.props.class
-        const requestOptions = {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(classroom)
-        }
-        let url = "http://localhost:8080/classes/update/"+classroom.code
-        fetch(url, requestOptions)
-            .then(response => {
-                console.log(response)                
+        let payload = this.props.class
+        let class_code = this.props.class.class_code
+        axios.put('http://localhost:8080/classes/'+class_code, payload)
+            .then((response) => {
                 this.props.setOpen(false)
                 let alert = {title: 'Success', message: 'Class info updated', type: 'positive ', alertState: true}
                 this.props.createAlert(alert)
-            });
+            })
     }
 
     handlePost(){
-        if (this.props.class.code === '')
+        if (this.props.class.class_code === '')
             this.postNewClass()
         else
             this.putClass()
     }
 
-    getClass(code){
-        let query = "http://localhost:8080/classes/get/"+code
-        fetch(query)
-            .then(res => res.json())
-            .then(
-            (result) => {
-                this.setState({ class: result});
-            },
-            (error) => {
-                console.log(error);
+    getClass(class_code){
+        axios.get('http://localhost:8080/classes/')
+            .then((response) => {
+                this.setState({ class: response.data })
+            })
+            .catch((error) => {
+                console.log(error)
             })
     }
 
@@ -64,7 +50,7 @@ class ClassModal extends Component{
                 onOpen={() => this.props.setOpen(true)}
                 open={this.props.open}
                 >
-                <Modal.Header>{(this.props.class.code === '')?"Create a new Class":"Edit Information"}</Modal.Header>
+                <Modal.Header>{(this.props.class.class_code === '')?"Create a new Class":"Edit Information"}</Modal.Header>
                 <Modal.Content>
                     <Modal.Description>
                     <Form>
@@ -96,7 +82,7 @@ class ClassModal extends Component{
                         negative
                     />
                     <Button
-                        content={(this.props.class.code === '')?"Add New Class":"Edit Information"}
+                        content={(this.props.class.class_code === '')?"Add New Class":"Edit Information"}
                         onClick={() => this.handlePost()}
                         positive
                     />

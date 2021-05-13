@@ -1,19 +1,24 @@
 import React from 'react'
-import { Table, Button, Icon, Segment } from 'semantic-ui-react';
+import { Button, Icon, Segment } from 'semantic-ui-react';
 import StudentModal from '../modal/studentModal'
 import DeleteModal from '../modal/deleteModal'
 import Message from '../message/index'
+import CustomTable from '../table/index';
+import BigMessage from '../message/bigMessage';
+import axios from 'axios'
+
 
 class StudentsPage extends React.Component{
 
   constructor(props){
     super(props)
-    this.state = { students: [{firstName: null, lastName: null, id: null}] ,
+    this.state = { students: [],
                   editModalState: false,
-                  selectedStudent: {firstName: '', lastName: '', id: ''},
+                  selectedStudent: {firstName: '', lastName: '', student_id: ''},
                   alert: {title: '', message: '', type: '', alertState: false,},
                   deleteModalState: false,
-                  deleteModal: {title: '', message: '', id: ''}
+                  deleteModal: {title: '', message: '', id: ''},
+                  header: ['First Name', 'Last Name'],
                  }
     this.handleChange = this.handleChange.bind(this);
     this.handleDelete = this.handleDelete.bind(this);
@@ -25,40 +30,40 @@ class StudentsPage extends React.Component{
   }
 
   getStudentList(){
-    let query = "http://localhost:8080/students/all"
-    fetch(query)
-        .then(res => res.json())
-        .then(
-        (result) => {
-            this.setState({ students: result});
-        },
-        (error) => {
-            console.log(error);
-        })
+    axios.get('http://localhost:8080/students/all')
+      .then((response) => {
+        let students = []
+        let index = ''
+        let student = {student_id: '', firstName: '', lastName: ''}
+        for (index in response.data){
+          student = response.data[index]
+          students.push([student.student_id, student.firstName, student.lastName])
+        }
+        this.setState({ students: students})
+      })
+      .catch((error) => {
+        console.log(error)
+      })
   }
 
-  getStudent(id){
-    let query = "http://localhost:8080/students/get/"+id
-    fetch(query)
-        .then(res => res.json())
-        .then(
-        (result) => {
-            console.log(result)
-            this.setState({ selectedStudent: result, editModalState: true});
-        },
-        (error) => {
-            console.log(error);
-        })
+  getStudent(student_id){
+    axios.get('http://localhost:8080/students/'+student_id)
+      .then((response) => {
+        this.setState({ selectedStudent: response.data, editModalState: true })
+      })
+      .catch((error) => {
+        console.log(error)
+      })
   }
 
-  editModalState = (state, id) => {
-    if (typeof id != "undefined"){
-      this.getStudent(id, state)
+  editModalState = (state, student_id) => {
+    if (typeof student_id != "undefined"){
+      this.getStudent(student_id, state)
     }
     else{
       this.setState({
         editModalState: state, 
-        selectedStudent: { firstName: '', lastName: '', id: '' }
+        selectedStudent: { firstName: '', lastName: '', student_id: '' }
       })
     }
   }
@@ -82,41 +87,39 @@ class StudentsPage extends React.Component{
     }));
   }
 
-  deleteModalState = (state, student) => {
-    if (typeof student == "undefined"){
+  deleteModalState = (state, row) => {
+    if (typeof row == "undefined"){
       this.setState({deleteModalState: state})
     }
-    else
+    else{      
       this.setState(prevState => ({
         deleteModal: {
             title: "Delete",
             message: "Are you sure you want to Delete: "  + 
-                      student.firstName + " " + student.lastName,
-            id: student.id
+                      row[1] + " " + row[2],
+            student_id: row[0]
         },
         deleteModalState: state
-      }));   
+      }));
+    }
+      
   }
 
   handleDelete () {
-    const requestOptions = {
-        method: 'DELETE',
-    }
-    let url = "http://localhost:8080/students/delete/"+this.state.deleteModal.id
-    fetch(url, requestOptions)
-        .then(response => {
-          console.log(response)
-          this.deleteModalState(false)
-          let alert = {}
-          if (response.status !== 204){
-            alert = {title: 'Error', message: 'Student can\'t be Deleted it was Assigned to a Class', 
+    let student_id = this.state.deleteModal.student_id
+    axios.delete('http://localhost:8080/students/' + student_id)
+      .then((response) => {
+        this.deleteModalState(false)
+        let alert = {title: 'Success', message: 'Student Deleted', type: 'positive', alertState: true}
+        this.createAlert(alert)
+      })
+      .catch((error) => {
+        console.log(error)
+        this.deleteModalState(false)
+        let alert = {title: 'Error', message: 'Student can\'t be Deleted it was Assigned to a Class', 
                       type: 'negative', alertState: true}
-          }
-          else {
-            alert = {title: 'Success', message: 'Student Deleted', type: 'positive', alertState: true}
-          }          
-          this.createAlert(alert);                  
-        });
+        this.createAlert(alert)
+      })
   }
 
   createAlert = (alert) => {
@@ -128,7 +131,6 @@ class StudentsPage extends React.Component{
 //The warning for "findDOMNode is deprecated in StrictMode" it's on the Button component 
 
     render(){
-      let students = this.state.students
       let editModalState = this.state.editModalState
       let deleteModalState = this.state.deleteModalState
       let selectedStudent = this.state.selectedStudent
@@ -161,34 +163,15 @@ class StudentsPage extends React.Component{
                 data={deleteModal}
               />
             </div>
-            <Table compact celled>
-              <Table.Header>
-                <Table.Row>
-                  <Table.HeaderCell>First Name</Table.HeaderCell>
-                  <Table.HeaderCell>Last Name</Table.HeaderCell>
-                  <Table.HeaderCell colSpan='1'>Edit</Table.HeaderCell>
-                  <Table.HeaderCell colSpan='1'>Delete</Table.HeaderCell>
-                </Table.Row>
-              </Table.Header>
-              <Table.Body>
-                {students.map((student) => 
-                  <Table.Row key={student.id}>
-                    <Table.Cell>{student.firstName}</Table.Cell>
-                    <Table.Cell>{student.lastName}</Table.Cell>
-                    <Table.Cell collapsing>
-                      <Button basic onClick={() => this.editModalState(true, student.id)}>
-                        <Icon name='edit'/>Edit
-                      </Button>
-                    </Table.Cell>
-                    <Table.Cell collapsing>
-                      <Button basic negative onClick={() => this.deleteModalState(true, student)}>
-                        <Icon name='trash'/>Delete
-                      </Button>
-                    </Table.Cell>
-                  </Table.Row> 
-                )}             
-              </Table.Body>        
-            </Table>
+            {this.state.students.length === 0?
+              <BigMessage message={"There are no Students Registered"}/>
+            : 
+              <CustomTable
+                header = {this.state.header}
+                data = {this.state.students}
+                editFunction = {this.editModalState}
+                deleteFunction = {this.deleteModalState}
+              />}
           </Segment>
         )
     }
