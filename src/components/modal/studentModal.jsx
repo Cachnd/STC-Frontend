@@ -9,7 +9,7 @@ class StudentModal extends Component{
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(this.props.student)
         }
-        let url = "http://localhost:8080/students/add"
+        let url = "http://localhost:8080/students"
         fetch(url, requestOptions)
             .then(response => {
                 console.log(response)
@@ -44,7 +44,7 @@ class StudentModal extends Component{
     }
 
     getStudent(id){
-        let query = "http://localhost:8080/students/get/"+id
+        let query = "http://localhost:8080/students/"+id
         fetch(query)
             .then(res => res.json())
             .then(
@@ -64,7 +64,7 @@ class StudentModal extends Component{
                 onOpen={() => this.props.setOpen(true)}
                 open={this.props.open}
                 >
-                <Modal.Header>{(this.props.student.id === '')?"Create a new Student":"Edit Information"}</Modal.Header>
+                <Modal.Header>{(this.props.student.student_id === '')?"Create a new Student":"Edit Information"}</Modal.Header>
                 <Modal.Content>
                     <Modal.Description>
                     <Form>
@@ -96,7 +96,7 @@ class StudentModal extends Component{
                         negative
                     />
                     <Button
-                        content={(this.props.student.id === '')?"Add New Student":"Edit Information"}
+                        content={(this.props.student.student_id === '')?"Add New Student":"Edit Information"}
                         onClick={() => this.handlePost()}
                         positive
                     />

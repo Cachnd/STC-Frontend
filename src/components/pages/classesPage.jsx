@@ -9,12 +9,12 @@ class ClassesPage extends React.Component{
 
   constructor(props){
     super(props)
-    this.state = { classes: [{title: null, description: null, code: null}] ,
+    this.state = { classes: [{title: null, description: null, class_code: null}] ,
                   editModalState: false,
-                  selectedClass: {title: '', description: '', code: ''},
+                  selectedClass: {title: '', description: '', class_code: ''},
                   alert: {title: '', message: '', type: '', alertState: false,},
                   deleteModalState: false,
-                  deleteModal: {title: '', message: '', code: ''},
+                  deleteModal: {title: '', message: '', class_code: ''},
                   assignModalOptions: [],
                   assignModalState: false,
                   studentId: ''
@@ -43,9 +43,10 @@ class ClassesPage extends React.Component{
         })
   }
 
-  getClass(code){
-    let query = "http://localhost:8080/classes/get/"+code
-    fetch(query)
+  getClass(class_code){
+    let query = "http://localhost:8080/classes/"+class_code
+    const options = { method: 'GET' }
+    fetch(query, options)
         .then(res => res.json())
         .then(
         (result) => {
@@ -57,14 +58,14 @@ class ClassesPage extends React.Component{
         })
   }
 
-  editModalState = (state, code) => {
-    if (typeof code != "undefined"){
-      this.getClass(code, state)
+  editModalState = (state, class_code) => {
+    if (typeof class_code != "undefined"){
+      this.getClass(class_code, state)
     }
     else{
       this.setState({
         editModalState: state, 
-        selectedClass: { title: '', description: '', code: '' }
+        selectedClass: { title: '', description: '', class_code: '' }
       })
     }
   }
@@ -97,7 +98,7 @@ class ClassesPage extends React.Component{
         deleteModal: {
             title: "Delete",
             message: "Are you sure you want to Delete: " + classroom.title,
-            code: classroom.code
+            class_code: classroom.class_code
         },
         deleteModalState: state
       }));   
@@ -108,7 +109,7 @@ class ClassesPage extends React.Component{
         const requestOptions = {
             method: 'DELETE',
         }
-        let url = "http://localhost:8080/classes/delete/"+this.state.deleteModal.code
+        let url = "http://localhost:8080/classes/delete/"+this.state.deleteModal.class_code
         fetch(url, requestOptions)
             .then(response => {
               console.log(response)
@@ -130,9 +131,10 @@ class ClassesPage extends React.Component{
     this.getClassesList()
   }
 
-  getClassToAssign (code){
-    let query = "http://localhost:8080/classes/get/"+code
-    fetch(query)
+  getClassToAssign (class_code){
+    let query = "http://localhost:8080/classes/"+class_code
+    const options = { method: 'GET' }
+    fetch(query, options)
         .then(res => res.json())
         .then(
         (result) => {
@@ -150,10 +152,10 @@ class ClassesPage extends React.Component{
             console.log(result)
             let options = []
             let index = ''
-            let student = {id: '', firstName: '', lastName: ''}
+            let student = {student_id: '', firstName: '', lastName: ''}
             for (index in result){
               student = result[index]
-              options.push({key: student.id, value: student.id, text: student.firstName+" "+student.lastName})
+              options.push({key: student.student_id, value: student.student_id, text: student.firstName+" "+student.lastName})
             }
             this.setState({ assignModalOptions: options});
         },
@@ -162,14 +164,14 @@ class ClassesPage extends React.Component{
         })
   }
 
-  assignModalState = (state, code) => {
-    if (typeof code != "undefined"){
-      this.getClassToAssign(code)
+  assignModalState = (state, class_code) => {
+    if (typeof class_code != "undefined"){
+      this.getClassToAssign(class_code)
     }
     else{
       this.setState({
         assignModalState: state, 
-        selectedClass: { title: '', description: '', code: '' }
+        selectedClass: { title: '', description: '', class_code: '' }
       })
     }
   }
@@ -178,7 +180,7 @@ class ClassesPage extends React.Component{
     const requestOptions = {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({class_code: this.state.selectedClass.code, student_id: this.state.studentId})
+        body: JSON.stringify({class_code: this.state.selectedClass.class_code, student_id: this.state.studentId})
     }
     let url = "http://localhost:8080/classes/assign/"
     fetch(url, requestOptions)
@@ -252,16 +254,16 @@ class ClassesPage extends React.Component{
               </Table.Header>
               <Table.Body>
                 {classes.map((classroom) => 
-                  <Table.Row key={classroom.code}>
+                  <Table.Row key={classroom.class_code}>
                     <Table.Cell>{classroom.title}</Table.Cell>
                     <Table.Cell>{classroom.description}</Table.Cell>
                     <Table.Cell collapsing>
-                      <Button basic onClick={() => this.editModalState(true, classroom.code)}>
+                      <Button basic onClick={() => this.editModalState(true, classroom.class_code)}>
                         <Icon name='edit'/>Edit
                       </Button>
                     </Table.Cell>
                     <Table.Cell collapsing>
-                      <Button basic onClick={() => this.assignModalState(true, classroom.code)}>
+                      <Button basic onClick={() => this.assignModalState(true, classroom.class_code)}>
                         <Icon name='list alternate outline'/>Assign
                       </Button>
                     </Table.Cell>

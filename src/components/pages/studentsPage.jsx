@@ -8,9 +8,9 @@ class StudentsPage extends React.Component{
 
   constructor(props){
     super(props)
-    this.state = { students: [{firstName: null, lastName: null, id: null}] ,
+    this.state = { students: [{firstName: null, lastName: null, student_id: null}] ,
                   editModalState: false,
-                  selectedStudent: {firstName: '', lastName: '', id: ''},
+                  selectedStudent: {firstName: '', lastName: '', student_id: ''},
                   alert: {title: '', message: '', type: '', alertState: false,},
                   deleteModalState: false,
                   deleteModal: {title: '', message: '', id: ''}
@@ -37,9 +37,10 @@ class StudentsPage extends React.Component{
         })
   }
 
-  getStudent(id){
-    let query = "http://localhost:8080/students/get/"+id
-    fetch(query)
+  getStudent(student_id){
+    let query = "http://localhost:8080/students/"+student_id
+    let options = {method: 'GET'}
+    fetch(query, options)
         .then(res => res.json())
         .then(
         (result) => {
@@ -51,14 +52,14 @@ class StudentsPage extends React.Component{
         })
   }
 
-  editModalState = (state, id) => {
-    if (typeof id != "undefined"){
-      this.getStudent(id, state)
+  editModalState = (state, student_id) => {
+    if (typeof student_id != "undefined"){
+      this.getStudent(student_id, state)
     }
     else{
       this.setState({
         editModalState: state, 
-        selectedStudent: { firstName: '', lastName: '', id: '' }
+        selectedStudent: { firstName: '', lastName: '', student_id: '' }
       })
     }
   }
@@ -92,7 +93,7 @@ class StudentsPage extends React.Component{
             title: "Delete",
             message: "Are you sure you want to Delete: "  + 
                       student.firstName + " " + student.lastName,
-            id: student.id
+                      student_id: student.student_id
         },
         deleteModalState: state
       }));   
@@ -102,7 +103,7 @@ class StudentsPage extends React.Component{
     const requestOptions = {
         method: 'DELETE',
     }
-    let url = "http://localhost:8080/students/delete/"+this.state.deleteModal.id
+    let url = "http://localhost:8080/students/"+this.state.deleteModal.student_id
     fetch(url, requestOptions)
         .then(response => {
           console.log(response)
@@ -172,11 +173,11 @@ class StudentsPage extends React.Component{
               </Table.Header>
               <Table.Body>
                 {students.map((student) => 
-                  <Table.Row key={student.id}>
+                  <Table.Row key={student.student_id}>
                     <Table.Cell>{student.firstName}</Table.Cell>
                     <Table.Cell>{student.lastName}</Table.Cell>
                     <Table.Cell collapsing>
-                      <Button basic onClick={() => this.editModalState(true, student.id)}>
+                      <Button basic onClick={() => this.editModalState(true, student.student_id)}>
                         <Icon name='edit'/>Edit
                       </Button>
                     </Table.Cell>

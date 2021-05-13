@@ -64,7 +64,7 @@ class ClassModal extends Component{
                 onOpen={() => this.props.setOpen(true)}
                 open={this.props.open}
                 >
-                <Modal.Header>{(this.props.class.code === '')?"Create a new Class":"Edit Information"}</Modal.Header>
+                <Modal.Header>{(this.props.class.class_code === '')?"Create a new Class":"Edit Information"}</Modal.Header>
                 <Modal.Content>
                     <Modal.Description>
                     <Form>
@@ -96,7 +96,7 @@ class ClassModal extends Component{
                         negative
                     />
                     <Button
-                        content={(this.props.class.code === '')?"Add New Class":"Edit Information"}
+                        content={(this.props.class.class_code === '')?"Add New Class":"Edit Information"}
                         onClick={() => this.handlePost()}
                         positive
                     />
